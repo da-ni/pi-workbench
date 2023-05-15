@@ -1,2 +1,2 @@
 # pi-workbench
-Repository to experiment with Generative AI, Vector DBs, etc.
+Branch Naming Convention : <initials>-base or <intitials>-<feature_name>, for example : `dn-base', 'dn-pdf-reader-integration'
