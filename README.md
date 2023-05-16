@@ -29,7 +29,7 @@ Once you have obtained an API key, you can set it as an environment variable in 
 - Then, rename the `example.env` file to `.env`.
 
 ### Creating a Vector Database
-To create a vector database for the Linux Language Model, you can use the create_db.py script. This script reads in a set of text documents and creates a vector representation of each document using the language model. The vectors are then stored in a database for efficient retrieval.
+To create a vector database for the Linux Language Model, you can use the create_db.py script. This script reads in a set of text documents and creates a vector representation of each document using openai embeddings model. The vectors are then stored in a database for efficient retrieval.
 
 To create a vector database, you can run the following command:
 
