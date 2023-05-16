@@ -44,8 +44,6 @@ To run the LLM, you can run the following command:
 
 `python linus.py [--db-dir /path/to/vector/db] [--prompt "your-prompt-as-string"]`
 
-For now, this will start the LLM and run a hardcoded prompt. Feel free to change the prompt in `linus.py`.
-
 ### Contributing
 If you would like to contribute to this project, please fork the repository and submit a pull request. We welcome contributions of all kinds, including bug fixes, new features, and improvements to the documentation.
 
