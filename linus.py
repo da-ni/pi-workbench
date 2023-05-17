@@ -11,9 +11,7 @@ import textwrap
 
 # Define the command line arguments
 parser = argparse.ArgumentParser(description='Run the Linux Language Model with an example prompt.')
-parser.add_argument('--output-dir', default='db', type=str, help='The directory of the vector database.')
-parser.add_argument('--prompt', default='What is the key philosophy of the linux operating system?', type=str, help='The prompt to run the Linux Language Model with.')
-
+parser.add_argument('--output-dir','-o', default='db', type=str, help='The directory of the vector database.')
 
 def wrap_text_preserve_newlines(text, width=110):
     lines = text.split('\n')
@@ -38,7 +36,8 @@ def main():
     load_dotenv()
 
     # load the vector store
-    persist_directory = args.output_dir
+    persist_directory = args.output_dir if len(args.output_dir) else os.environ['PERSIST_DIRECTORY']
+    print(persist_directory)
     embeddings = OpenAIEmbeddings() # type: ignore
     vectordb = Chroma(
         persist_directory=persist_directory, 
@@ -56,10 +55,14 @@ def main():
         return_source_documents=True
     )
 
-    # run the chain
-    prompt = args.prompt
-    llm_response = qa_chain(prompt)
-    process_llm_response(llm_response)
+    while True:
+        prompt = input("\nEnter a prompt: ")
+        if prompt == "exit":
+            break
+
+        # run the chain
+        llm_response = qa_chain(prompt)
+        process_llm_response(llm_response)
 
 
 if __name__ == "__main__":
