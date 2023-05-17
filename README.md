@@ -29,20 +29,20 @@ Once you have obtained an API key, you can set it as an environment variable in 
 - Then, rename the `example.env` file to `.env`.
 
 ### Creating a Vector Database
-To create a vector database for the Linux Language Model, you can use the create_db.py script. This script reads in a set of text documents and creates a vector representation of each document using openai embeddings model. The vectors are then stored in a database for efficient retrieval.
+To create a vector database for the Linux Language Model, you can use the `vectorize.py` script. This script reads in documents (mutliple types supported) and creates a vector representation of each document using the penai embeddings model. The vectors are then stored in a database for efficient retrieval.
 
 To create a vector database, you can run the following command:
 
-`python create_db.py [--input-dir /path/to/text/files] [--output-dir /path/to/vector/db]`
+`python create_db.py [--source-dir /path/to/text/files] [--output-dir /path/to/vector/db]`
 
-This will create a vector database in the specified output directory, containing vector representations of all the text files in the input directory.
+This will create a vector database in the specified output directory, containing vector representations of all the text files in the source directory.
 
 ### Running the LLM
-To run the Linux Language Model, you can use the linus.py script. This script loads the vector database and the language model, and provides an interactive interface for querying the model.
+To run the Linux Language Model, you can use the linus.py script. This script loads the vector database and the language model, and provides an interactive terminal session for prompting the model.
 
 To run the LLM, you can run the following command:
 
-`python linus.py [--db-dir /path/to/vector/db] [--prompt "your-prompt-as-string"]`
+`python linus.py [--db-dir /path/to/vector/db]`
 
 ### Contributing
 If you would like to contribute to this project, please fork the repository and submit a pull request. We welcome contributions of all kinds, including bug fixes, new features, and improvements to the documentation.
