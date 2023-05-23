@@ -46,18 +46,11 @@ def run_prompt(request: PromptRequest):
     return processed_response
 
 if __name__ == "__main__":
-    # Define the command line arguments
-    parser = argparse.ArgumentParser(description='Run the Linux Language Model with an example prompt.')
-    parser.add_argument('--output-dir','-o', default='db', type=str, help='The directory of the vector database.')
-
-    # Parse the command line arguments
-    args = parser.parse_args()
-
-    # Load the API keys
+    # Load the API keys and other environment variables
     load_dotenv()
 
     # Load the vector store
-    persist_directory = args.output_dir if len(args.output_dir) else os.environ['PERSIST_DIRECTORY']
+    persist_directory = os.environ['PERSIST_DIRECTORY']
     embeddings = OpenAIEmbeddings()
     vectordb = Chroma(
         persist_directory=persist_directory,
