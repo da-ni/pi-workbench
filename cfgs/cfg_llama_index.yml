@@ -1,0 +1,7 @@
+# define prompt helper setup
+# set maximum input size
+max_input_size: 4096
+# set number of output tokens
+num_output: 256
+# set maximum chunk overlap
+max_chunk_overlap: 20
