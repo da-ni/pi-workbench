@@ -1,3 +1,6 @@
 .env
 .vscode/settings.json
 db/
+llama_index/
+tree-of-thoughts/
+
