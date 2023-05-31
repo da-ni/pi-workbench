@@ -2,4 +2,5 @@
 .vscode/settings.json
 db/
 llama_index/
+raw_data/
 
