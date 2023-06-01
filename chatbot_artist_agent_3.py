@@ -110,6 +110,8 @@ def main():
     with I, I am,..
     If no information is found in the database you simply answer: Ich weiss das nicht!
     """
+
+    # sys_msg = """Always translate the Final Answer into FRENCH before returning it"""
     
     new_prompt = agent.agent.create_prompt(system_message=sys_msg, tools=tools)
     
