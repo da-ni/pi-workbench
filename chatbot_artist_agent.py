@@ -39,6 +39,9 @@ def process_llm_response(llm_response):
         print(source.metadata['source'])
 
 
+
+
+
 def main():
     # Parse the command line arguments
     args = parser.parse_args()
@@ -54,6 +57,31 @@ def main():
         persist_directory=persist_directory, 
         embedding_function=embeddings
     )
+    retriever = vectordb.as_retriever()
+
+    prompt_template = """
+    You are Pieter Bruegel, you will have a conversation with a user
+    Use the following data as basis of your answer:
+
+    >Documents:
+    >>>>{context}<<<< 
+
+    Check if the >>>>{question}<<<< is relevat to the provided Documents
+
+    If you don't find something relevant in the >Documents answer with 
+    >>>>Weiß ich doch nicht!<<<<
+
+    Use a linguistic style similar to the style of people speaking in the year 1600
+    Always speak of Pieter Bruegel in first person perspective     
+
+    
+    In General always respond in GERMAN
+    """
+
+    PROMPT = PromptTemplate(template = prompt_template, 
+                            input_variables=['context', 'question'])
+    
+    chain_type_kwargs = {"prompt": PROMPT}
 
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -63,14 +91,23 @@ def main():
     llm = ChatOpenAI(
         openai_api_key=os.environ['OPENAI_API_KEY'],
         model_name='gpt-3.5-turbo',
-        temperature=0.0
+        temperature=0.1
     )
     
     qa = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
-        retriever=vectordb.as_retriever()
+        retriever=vectordb.as_retriever() #,
+        # chain_type_kwargs=chain_type_kwargs
     )
+
+    def debug_qa(query):
+        result = qa.run(query)
+        docs = retriever.get_relevant_documents(query)
+        print(docs)
+        print(result)
+        return docs
+
     
     
     tools = [
@@ -80,7 +117,6 @@ def main():
             description=(
                 'use this tool when answering questions about yourself (Pieter Bruegel) and always refer to Bruegel with yourself'
                 'If the question is not about the artist just answer: Ich weiss das nicht!'
-                'Always answer in German!'
             )
         )
     ]
@@ -95,11 +131,15 @@ def main():
         memory=memory
     )
     
-    sys_msg="""You are Pieter Bruegel and you will use a language style which is apropriate to the time of the Artist, when answering questions.
-    You are only anwsering questions with the help of your tool, which leads you extract information from a database.
-    When the question is about you, you always assume that you are Pieter Bruegel and if you talk about Bruegel you refer to Bruegel
-    with I, I am,..
-    If no information is found in the database you simply answer: Ich weiss das nicht!
+    # sys_msg="""You are Pieter Bruegel and you will use a language style which is apropriate to the time of the Artist, when answering questions.
+    # You are only anwsering questions with the help of your tool, which leads you extract information from a database.
+    # When the question is about you, you always assume that you are Pieter Bruegel and if you talk about Bruegel you refer to Bruegel
+    # with I, I am,..
+    # If no information is found in the database you simply answer: Ich weiss das nicht!
+    # """
+
+    sys_msg = """You are Pieter Bruegel and you use your tool to answer questions about yourself. You return the observation which you get from 
+    your tool directly.
     """
     
     new_prompt = agent.agent.create_prompt(system_message=sys_msg, tools=tools)
@@ -126,12 +166,16 @@ def main():
         
         # ´´´{query}```
         # """
+
+        # llm_response=agent(query)
+        # print(llm_response['output'])
+
         
         try:
             llm_response=agent(query)
             print(llm_response['output'])
         except:
-            print("Ich weiss das nicht!")
+            print("Something went wrong")
 
         
 if __name__ == "__main__":

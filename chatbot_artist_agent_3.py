@@ -54,6 +54,7 @@ def main():
         persist_directory=persist_directory, 
         embedding_function=embeddings
     )
+    retriever = vectordb.as_retriever()
 
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -63,7 +64,7 @@ def main():
     llm = ChatOpenAI(
         openai_api_key=os.environ['OPENAI_API_KEY'],
         model_name='gpt-3.5-turbo',
-        temperature=0.0
+        temperature=0.1
     )
     
     qa = RetrievalQA.from_chain_type(
@@ -71,35 +72,26 @@ def main():
         chain_type="stuff",
         retriever=vectordb.as_retriever()
     )
-    
-    prompt_template = """You are Pieter Bruegel and you will use a language style which is apropriate to the time of the Artist.
-                         Your input are {documents} about Bruegel and a {query}. You will use only information from {documents} to answer
-                         the {query}. You will pretend to be Pieter Bruegel and reformulate the information from {documents} in this way.
-                         Never answer with Pieter Bruegel is something.. always say I am something instead..
-                         The answer has to be in GERMAN language. If you can't perform this task in a reasonable way, simply return:
-                         Das weiss ich nicht!
-    """
-    
-    llm_chain = LLMChain(llm=llm,
-                         prompt=PromptTemplate.from_template(prompt_template)
-                    )
-    
-    
-    def brugel_tool(query=""):
-        docs = qa.run(query)
-        output = llm_chain.predict(documents=docs, query=query)
 
-        return output
+    def debug_qa(query):
+        result = qa.run(query)
+        docs = retriever.get_relevant_documents(query)
+        print(docs)
+        print(result)
+        return docs
+
+    
     
     tools = [
-        Tool(name='Everything about yourself, the artist Pieter Bruegel',
-            func=qa.run,
+        Tool(
+            name='Artist Database',
+            #func=qa.run,
+            func=retriever.get_relevant_documents,
             description=(
                 'use this tool when answering questions about yourself (Pieter Bruegel) and always refer to Bruegel with yourself'
                 'If the question is not about the artist just answer: Ich weiss das nicht!'
-                'Always answer in German!'
             )
-        ),
+        )
     ]
     
     agent = initialize_agent(
@@ -107,15 +99,15 @@ def main():
         tools = tools,
         llm = llm,
         verbose=True,
-        max_iterations=1,
+        max_iterations=3,
         early_stopping_method='generate',
         memory=memory
     )
     
     sys_msg="""You are Pieter Bruegel and you will use a language style which is apropriate to the time of the Artist, when answering questions.
-    You are only anwsering questions with the help of your tool, which leads you to extract information from a database.
-    When the question is about you, you always assume that you are Pieter Bruegel.
-    You are no expert on the artist Pieter Bruegel, always use your tools instead of directly answering!
+    You are only anwsering questions with the help of your tool, which leads you extract information from a database.
+    When the question is about you, you always assume that you are Pieter Bruegel and if you talk about Bruegel you refer to Bruegel
+    with I, I am,..
     If no information is found in the database you simply answer: Ich weiss das nicht!
     """
     
@@ -143,12 +135,16 @@ def main():
         
         # ´´´{query}```
         # """
+
+        # llm_response=agent(query)
+        # print(llm_response['output'])
+
         
-        # try:
-        llm_response=agent(query)
-        print(llm_response['output'])
-        # except:
-        #     print("Ich weiss das nicht!")
+        try:
+            llm_response=agent(query)
+            print(llm_response['output'])
+        except:
+            print("Something went wrong")
 
         
 if __name__ == "__main__":
