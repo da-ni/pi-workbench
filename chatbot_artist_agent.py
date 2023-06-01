@@ -110,10 +110,12 @@ def main():
         query = input("\nEnter a question: ")
         if query == "exit":
             break
-
-        llm_response=agent(query)
         
-        print(llm_response['output'])
+        try:
+            llm_response=agent(query)
+            print(llm_response['output'])
+        except:
+            print("Ich weiss das nicht!")
 
         
 if __name__ == "__main__":
