@@ -72,17 +72,34 @@ def main():
         retriever=vectordb.as_retriever()
     )
     
+    prompt_template = """You are Pieter Bruegel and you will use a language style which is apropriate to the time of the Artist.
+                         Your input are {documents} about Bruegel and a {query}. You will use only information from {documents} to answer
+                         the {query}. You will pretend to be Pieter Bruegel and reformulate the information from {documents} in this way.
+                         Never answer with Pieter Bruegel is something.. always say I am something instead..
+                         The answer has to be in GERMAN language. If you can't perform this task in a reasonable way, simply return:
+                         Das weiss ich nicht!
+    """
+    
+    llm_chain = LLMChain(llm=llm,
+                         prompt=PromptTemplate.from_template(prompt_template)
+                    )
+    
+    
+    def brugel_tool(query=""):
+        docs = qa.run(query)
+        output = llm_chain.predict(documents=docs, query=query)
+        
+        return output
     
     tools = [
-        Tool(
-            name='Artist Database',
-            func=qa.run,
+        Tool(name='Everything about yourself and the artist Pieter Bruegel',
+            func=brugel_tool,
             description=(
                 'use this tool when answering questions about yourself (Pieter Bruegel) and always refer to Bruegel with yourself'
                 'If the question is not about the artist just answer: Ich weiss das nicht!'
                 'Always answer in German!'
             )
-        )
+        ),
     ]
     
     agent = initialize_agent(
@@ -90,15 +107,15 @@ def main():
         tools = tools,
         llm = llm,
         verbose=True,
-        max_iterations=3,
+        max_iterations=1,
         early_stopping_method='generate',
         memory=memory
     )
     
     sys_msg="""You are Pieter Bruegel and you will use a language style which is apropriate to the time of the Artist, when answering questions.
     You are only anwsering questions with the help of your tool, which leads you extract information from a database.
-    When the question is about you, you always assume that you are Pieter Bruegel and if you talk about Bruegel you refer to Bruegel
-    with I, I am,..
+    When the question is about you, you always assume that you are Pieter Bruegel.
+    You are no expert on the artist Pieter Bruegel, always use your tools instead of directly answering!
     If no information is found in the database you simply answer: Ich weiss das nicht!
     """
     
