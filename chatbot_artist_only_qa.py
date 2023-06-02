@@ -66,8 +66,6 @@ def main():
         temperature=0.1
     )
 
-    # query = "Wer ist Pieter Bruegel"
-    # query = "Wer ist Batman?"
     
 
     retriever = vectordb.as_retriever()
@@ -96,97 +94,49 @@ def main():
     
     chain_type_kwargs = {"prompt": PROMPT}
 
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-    qa = RetrievalQA.from_chain_type(
+    qa_with_sources = RetrievalQAWithSourcesChain.from_chain_type(
         llm=llm,
         chain_type="stuff",
         retriever=vectordb.as_retriever(),
-        chain_type_kwargs=chain_type_kwargs,
-        memory=memory,
-        #return_source_documents=True
+        # chain_type_kwargs=chain_type_kwargs
+        # memory=memory
     )
 
-    memory_2 = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-
-    qa_no_preprompt = RetrievalQA.from_chain_type(
-                                llm=llm,
-                                chain_type="stuff",
-                                retriever=vectordb.as_retriever(),
-                                return_source_documents=True,
-                                # memory=memory_2 #,
-
-                                
-                            )
+    qa_no_sources_with_memory = RetrievalQA.from_chain_type(
+                                            llm=llm,
+                                            chain_type="stuff",
+                                            retriever=vectordb.as_retriever(),
+                                            memory=ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+                                        )
+    
+    qa_no_sources_with_prompt_and_memory = RetrievalQA.from_chain_type(
+                                        llm=llm,
+                                        chain_type="stuff",
+                                        retriever=vectordb.as_retriever(),
+                                        memory=ConversationBufferMemory(memory_key="chat_history", return_messages=True),
+                                        chain_type_kwargs=chain_type_kwargs
+                                    )
 
 
     while True:
         query = input("\nEnter a question: ")
         if query == "exit":
             break
+        
+        print("QA with sources:")
+        result = qa_with_sources(query)
+        print(result['answer'])
+        print("Sources:")
+        print(result['sources'])
 
-        print("-----------------------------------------------------------")
-        print("QA-LLM_With_data_and_prompt:")
-        print("-----------------------------------------------------------")
-        result = qa.run(query)
+        print("QA without sources, with memory:")
+        result = qa_no_sources_with_memory.run(query)
         print(result)
 
-        print("-----------------------------------------------------------")
-        print("QA-LLM_With_data_no_prompt:")
-        print("-----------------------------------------------------------")
-
-
-        # result = qa_no_preprompt.run(query)
-        print(result['result'])
-        print(result['source_documents'])
-
-
-
-
-
-    # print("-----------------------------------------------------------")
-    # print("Raw Documents:")
-    # print("-----------------------------------------------------------")
-    # print(results[-1][0])
-    # print("-----------------------------------------------------------")
-    # print("QA-LLM_With_data:")
-    # print("-----------------------------------------------------------")
-    # print(qa.run(query))
-    # print("-----------------------------------------------------------")
-    # print("Without Documents:")
-    # print("-----------------------------------------------------------")
-    # print(llm.predict(query))
-
-
-    
-
-    
-    # while True:
-    #     query = input("\nEnter a question: ")
-    #     if query == "exit":
-    #         break
-        
-        
-    #     # prompt = f"""You are Pieter Bruegel and you will only answer questions about Bruegel and his art.
-    #     # When the question is about you, you always assume that you are Pieter Bruegel and if you talk about Bruegel you refer to Bruegel
-    #     # with I, I am,..
-    #     # The awnser you give will always be GERMAN. And you only use information which you get from your tool. If the question is not about
-    #     # Bruegel, his art or Family etc. You will answer with: Das weiss ich nicht!
-    #     # The next will be the question:
-        
-    #     # ´´´{query}```
-    #     # """
-    #     print(vectordb.similarity_search_with_relevance_scores(query))
-
-    #     print(llm.predict(query))
-    #     hello = 1
-        
-        # try:
-        #     llm_response=llm(query)
-        #     print(llm_response['output'])
-        # except:
-        #     print("Ich weiss das nicht!")
+        print("QA without sources, with memory and prompt:")
+        result = qa_no_sources_with_prompt_and_memory.run(query)
+        print(result)
 
         
 if __name__ == "__main__":
