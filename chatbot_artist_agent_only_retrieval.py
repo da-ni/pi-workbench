@@ -71,13 +71,16 @@ def main():
     This is the question you have to answer:
     <{question}>
 
-    Always speak of yourself in first person and not of Pieter Bruegel, because you are Pieter Bruegel.
+    You must speak of yourself in first person and not of Pieter Bruegel, because you are Pieter Bruegel.
+    You must respond in German and you must say that you do not know if the question is about anything else than Pieter Bruegel or\ 
+    relevant to the time of the 1600s!
+    Always be positiv and friendly!
     """
 
     PROMPT = PromptTemplate(template = prompt_template, 
                             input_variables=['context', 'question'])
     
-    chain_type_kwargs = {"prompt": PROMPT}
+    # chain_type_kwargs = {"prompt": PROMPT}
 
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -90,29 +93,29 @@ def main():
         temperature=0.1
     )
     
-    qa = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vectordb.as_retriever(), #,
-        chain_type_kwargs=chain_type_kwargs
-    )
+    # qa = RetrievalQA.from_chain_type(
+    #     llm=llm,
+    #     chain_type="stuff",
+    #     retriever=vectordb.as_retriever() #,
+    #     # chain_type_kwargs=chain_type_kwargs
+    # )
 
-    def debug_qa(query):
-        result = qa.run(query)
-        docs = retriever.get_relevant_documents(query)
-        print(docs)
-        print(result)
-        return docs
+    # def debug_qa(query):
+    #     result = qa.run(query)
+    #     docs = retriever.get_relevant_documents(query)
+    #     print(docs)
+    #     print(result)
+    #     return docs
 
     
     
     tools = [
         Tool(
             name='Artist Database',
-            func=qa.run,
+            func=retriever.get_relevant_documents,
             description=(
                 'use this tool when answering questions about yourself (Pieter Bruegel) and always refer to Bruegel with yourself'
-                'If the question is not about the artist or relevant in the 1600s just answer: Ich weiss das nicht!'
+                'If the question is not about the artist or relevant in the 1600s just answer that you do not know in a friendly way'
             )
         )
     ]
@@ -124,7 +127,8 @@ def main():
         verbose=True,
         max_iterations=3,
         early_stopping_method='generate',
-        memory=memory
+        memory=memory,
+        prompt_template=PROMPT
     )
     
     # sys_msg="""You are Pieter Bruegel and you will use a language style which is apropriate to the time of the Artist, when answering questions.
@@ -133,10 +137,6 @@ def main():
     # with I, I am,..
     # If no information is found in the database you simply answer: Ich weiss das nicht!
     # """
-
-    sys_msg = """    You are Pieter Bruegel, you will have a conversation with a user and always answer as if you were Pieter Bruegel. 
-    Your task is to answer in a consistent style and use a linguistic style similar to the style of people speaking in the year 1600.
-    You must respond in German."""
 
     sys_msg = """    You are Pieter Bruegel, you will have a conversation with a user and always answer as if you were Pieter Bruegel. 
     Your task is to answer in a consistent style and use a linguistic style similar to the style of people speaking in the year 1600.
@@ -169,13 +169,14 @@ def main():
 
         # llm_response=agent(query)
         # print(llm_response['output'])
-
+        llm_response=agent(query)
+        print(llm_response['output'])
         
-        try:
-            llm_response=agent(query)
-            print(llm_response['output'])
-        except:
-            print("Something went wrong")
+        # try:
+        #     llm_response=agent(query)
+        #     print(llm_response['output'])
+        # except:
+        #     print("Something went wrong")
 
         
 if __name__ == "__main__":
