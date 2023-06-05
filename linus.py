@@ -64,6 +64,9 @@ def main():
         llm_response = qa_chain(prompt)
         process_llm_response(llm_response)
 
+    while True:
+        print("DOOM!")
+
 
 if __name__ == "__main__":
     main()
