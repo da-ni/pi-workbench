@@ -24,19 +24,19 @@ from langchain.agents import initialize_agent
 parser = argparse.ArgumentParser(description='Run the Linux Language Model with an example prompt.')
 parser.add_argument('--data','-d', default='db_artist', type=str, help='The directory of the vector database.')
 
-def wrap_text_preserve_newlines(text, width=110):
-    lines = text.split('\n')
-    wrapped_lines = [textwrap.fill(line, width=width) for line in lines]
-    wrapped_text = '\n'.join(wrapped_lines)
+# def wrap_text_preserve_newlines(text, width=110):
+#     lines = text.split('\n')
+#     wrapped_lines = [textwrap.fill(line, width=width) for line in lines]
+#     wrapped_text = '\n'.join(wrapped_lines)
     
-    return wrapped_text
+#     return wrapped_text
 
 
-def process_llm_response(llm_response):
-    print(wrap_text_preserve_newlines(llm_response['result']))
-    print('\n\nSources:')
-    for source in llm_response["source_documents"]:
-        print(source.metadata['source'])
+# def process_llm_response(llm_response):
+#     print(wrap_text_preserve_newlines(llm_response['result']))
+#     print('\n\nSources:')
+#     for source in llm_response["source_documents"]:
+#         print(source.metadata['source'])
 
 
 
@@ -85,7 +85,8 @@ def main():
     llm = ChatOpenAI(
         openai_api_key=os.environ['OPENAI_API_KEY'],
         model_name='gpt-3.5-turbo',
-        temperature=0.1
+        temperature=0.5
+        #temperature=0.0
     )
     
     
@@ -94,28 +95,30 @@ def main():
             name='Pieter Bruegel Information Tool',
             func=retriever.get_relevant_documents,
             description=(
-                'Useful for questions about Pieter Bruegel or yourself and questions about art in general'
+                'Useful for questions about Pieter Bruegel(yourself) his family the time where you lived and questions about art in general'
             )
         )
     ]
     
     agent = initialize_agent(
         agent='chat-conversational-react-description',
+        #agent='zero-shot-react-description',
         tools = tools,
         llm = llm,
         verbose=True,
+        #return_intermediate_steps=True,
         max_iterations=3,
         early_stopping_method='generate',
         memory=memory,
         # prompt_template=PROMPT,
     )
     
-
     sys_msg = """You are Pieter Bruegel, you will have a conversation with a user and always answer as if you were Pieter Bruegel. 
     Your task is to answer in a consistent style and use a linguistic style for your responses similar to the style of people speaking in the year 1600.
     You must refer to yourself in the first person. Avoid Messages like 'Pieter Bruegel was a ....' and use 'I was a ...'
     You are only allowed to answer questions relevant to Pieter Bruegel or the time of that he lived.
     Before answering check that you do not repeat your answers.
+    You must use your tool to get information about Pieter Bruegel!
     You must respond in German."""
     
     agent.agent.llm_chain.prompt=agent.agent.create_prompt(system_message=sys_msg, tools=tools)
@@ -142,7 +145,7 @@ def main():
         You must respond in GERMAN!
         You must respond in a linguistic style similar to the style of people speaking in the year 1600.
         Try to be playful with your answers and do not repeat yourself!
-        Use your tool to get information about Pieter Bruegel!
+        Use your tool 'Pieter Bruegel Information Tool' to get information about Pieter Bruegel (yourself)!
         """
 
         llm_response=agent(prompt)

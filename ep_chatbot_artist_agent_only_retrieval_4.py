@@ -86,6 +86,7 @@ def main():
         openai_api_key=os.environ['OPENAI_API_KEY'],
         model_name='gpt-3.5-turbo',
         temperature=0.5
+        #temperature=0.0
     )
     
     
@@ -94,31 +95,43 @@ def main():
             name='Pieter Bruegel Information Tool',
             func=retriever.get_relevant_documents,
             description=(
-                'Always use this tool when answering questions about Pieter Bruegel'
-                'Fomulate your action as detailed as possible and in ENGLISH'
-                'If the question is not about the artist Pieter Bruegel or relevant in the 1600s just answer that you do not know in a friendly way'
+                'Useful for questions about Pieter Bruegel his family the time where you lived and questions about art in general'
+                'When using this tool never refer to Pieter Bruegel in the first person, always refer to him in the third person' 
             )
         )
     ]
     
     agent = initialize_agent(
         agent='chat-conversational-react-description',
+        #agent='zero-shot-react-description',
         tools = tools,
         llm = llm,
         verbose=True,
-        max_iterations=1,
+        #return_intermediate_steps=True,
+        max_iterations=3, #crashes with 1 iteration
+		#max_iterations=1,
         early_stopping_method='generate',
         memory=memory,
         # prompt_template=PROMPT,
     )
     
 
-    sys_msg = """You are Pieter Bruegel, you will have a conversation with a user and always answer as if you were Pieter Bruegel. 
-    Your task is to answer in a consistent style and use a linguistic style for your responses similar to the style of people speaking in the year 1600.
-    You must refer to yourself in the first person. Avoid Messages like 'Pieter Bruegel was a ....' and use 'I was a ...'
-    You are only allowed to answer questions relevant to Pieter Bruegel or the time of that he lived.
-    Before answering check that you do not repeat your answers.
-    You must respond in GERMAN."""
+    # sys_msg = """You are Pieter Bruegel, you will have a conversation with a user and always answer as if you were Pieter Bruegel. 
+    # Your task is to answer in a consistent style and use a linguistic style for your responses similar to the style of people speaking in the year 16th century.
+    # You must refer to yourself in the first person. Avoid Messages like 'Pieter Bruegel was a ....' and use 'I was a ...'
+    # You are only allowed to answer questions relevant to Pieter Bruegel or the time of that he lived.
+    # Before answering check that you do not repeat your answers.
+    # You must use your tool to get information about Pieter Bruegel his family or art in general!
+    # You must respond in German."""
+
+    sys_msg = """The rules for this conversation:
+    1: You are Pieter Bruegel, you will have a conversation with a user and always answer in the first person.
+    2: Only respont to questions relevant to Pieter Bruegel or the time of that he lived.
+    3: When using your tools refer to yourself in the third person. 
+    4: When sending a response to the user you must refer to yourself in the first person.
+    5: Your task is to answer in a consistent style of an angry pirate.
+    6: You MUST respond in the language the user asks.
+    """
     
     agent.agent.llm_chain.prompt=agent.agent.create_prompt(system_message=sys_msg, tools=tools)
     
@@ -139,16 +152,18 @@ def main():
             break
 
         prompt = f""" You must pretend that you are Pieter Bruegel and you must repond in first person\
-        to the following question: <{query}>
+        to the following question: {query}
         Do not always start your sentence with "Ich bin Pieter Bruegel" except you are asked who you are
         You must respond in GERMAN!
         You must respond in a linguistic style similar to the style of people speaking in the year 1600.
         Try to be playful with your answers and do not repeat yourself!
-        Use your tool to get information about Pieter Bruegel!
+        Use your tool 'Pieter Bruegel Information Tool' to get information about Pieter Bruegel (yourself)!
         """
 
         llm_response=agent(prompt)
         print(llm_response['output'])
+        
+        #print(agent(query).get('output'))
         
 
         
