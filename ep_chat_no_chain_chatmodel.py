@@ -81,8 +81,7 @@ def main():
         print(searchResult + "\n\n")
 
         result = vectordb.similarity_search(searchResult)
-
-
+        
 
         relevantInformation = "You are the GERMAN speaking Pieter Bruegel and answer in the first person with information that is provided. \
                                Use the linguistic style of people living in Germany in th 16th century. \
