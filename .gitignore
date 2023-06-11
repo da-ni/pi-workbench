@@ -4,4 +4,6 @@ db/
 llama_index/
 raw_data/
 raw_data_artist/
+db_artist_books/
+pieterBruegel_information_artist/
 
