@@ -33,17 +33,7 @@ def main():
     retriever = vectordb.as_retriever()
 
     chat_history = ""
-    #chat_history = ChatMessageHistory()
-    #chat_history.add_message("Hi ich bin Lukas")
-    #chat_history.add_ai_message("Hey Heyyy :) bin Pieter Bruegel")
 
-    #initialize the llm
-    #llm = OpenAI(temperature=0)
-
-    #initailize llm for answering
-    #llmPieter = OpenAI(temperature=0.5)
-
-    # not working with model='gpt-3.5-turbo'
     llmSimilarty = ChatOpenAI(temperature=0, model='gpt-3.5-turbo')
     #llm = OpenAI(temperature=0, model='gpt-3.5-turbo')
     llmPieter = ChatOpenAI(temperature=1, model='gpt-3.5-turbo')
@@ -52,12 +42,18 @@ def main():
     #template for the similarty search
     prepare_prompt = PromptTemplate(
         input_variables=["query", "chat_history"],
-        template ="""You are Pieter Bruegel. You must only reply the final translated and rephrased question \
-                    Use the latest question of a user and the context from the conversation and translate it to ENGLISH \
-                    then restructure it to the third person view \
-                    then rephrase the question in a way that is relevant for a similarity search in the documents \n\n \
-                    This is the conversation between you and the user so far: \n{chat_history}\n\n \
-                    This is the latest question from the user: \n{query}\n\n"""
+        template ="""You are Pieter Bruegel and take the following steps: \n\
+                    1 Translate the <latest_question> of the user and to ENGLISH \n\
+                    2 Rephrase the question to the first person view \n\
+                    3 Use this translated and rephrashed question and the context \
+                    from the <previous_conversation> with user and generate a prompt to find relevant documents \n\n \
+                    This is the conversation between you and the user so far <previous_conversation>: \n{chat_history}\n\n \
+                    
+                    This is the latest question from the user<latest_question> : \n{query}\n\n
+
+                    Here is an example:
+                    <latest question>:  Wer bist du
+                    <ai_response>: Who is Pieter Bruegel"""
     )
 
     #chain = LLMChain(llm=llm, prompt=prepare_prompt, verbose=True)

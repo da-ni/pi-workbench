@@ -26,12 +26,12 @@ def main():
     retriever = vectordb.as_retriever()
 
     #initialize the llm
-    #llm = OpenAI(temperature=0)
+    llm = OpenAI(temperature=0)
 
     #initailize llm for answering
     #llmPieter = OpenAI(temperature=0.5)
 
-    llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo')
+    #llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo')
     llmPieter = ChatOpenAI(temperature=1, model='gpt-3.5-turbo')
 
     # #Load memory
