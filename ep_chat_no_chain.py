@@ -40,7 +40,8 @@ def main():
 
     #initialize the conversational chain
     qa = ConversationalRetrievalChain.from_llm(
-        llm=llm, 
+        llm=llm,
+         
         retriever=retriever, 
         memory=memory, #either memory or source documents....
         #return_source_documents=True 
