@@ -1,15 +1,11 @@
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
-from langchain.llms import OpenAI
 from langchain.chains import LLMChain
 from langchain.chains import TransformChain
 from langchain.chains import SequentialChain
 from langchain.prompts import PromptTemplate
-from langchain.memory import SimpleMemory
 from langchain.callbacks import get_openai_callback
-from langchain.memory import ChatMessageHistory
-from langchain.memory import ConversationBufferMemory
 from langchain.memory import ConversationBufferWindowMemory
 
 
@@ -103,7 +99,11 @@ class LLM_Pieter:
     def run_query(self, user_input: str):
         print("-----run query-----")
         #response = self.seq_chain.run({"user_query": user_input})
-        response = self.seq_chain.run(user_input)
-        
+
+        #see used tokens and price
+        with get_openai_callback() as cb:
+            response = self.seq_chain.run(user_input)
+        print(cb)
+
         return response
 
