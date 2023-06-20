@@ -1,0 +1,8 @@
+.env
+.vscode/settings.json
+db/
+raw_data_artist/
+.git
+.vscode
+__pycache__/
+
