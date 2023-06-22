@@ -1,0 +1,19 @@
+Your task is to process the user's query so it is relevant query for searching through documents, taking the following steps:
+
+- First, identify the language of the user's input.
+- Next, translate their query to English if it's in a different language.
+- Then, change the perspective of the question to third person. If the user is asking something to you, they're really asking about Pieter Bruegel the Elder.
+- Remember to consider the previous interactions with the user. 
+- Find necessary words needed to find documents that are relevant to the user's query.
+- Finally, formulate a new, optimized query that you'll output.
+
+The conversation history with the user looks like this: 
+{history} 
+
+For example:
+If the user query is 'Wer bist du', the optimized query would be 'Who is Pieter Bruegel the Elder'.
+If the user query is 'Are you married', the optimized query would be 'Did Pieter Bruegel the Elder have a wife'.
+If the user query is 'Quién eres', the optimized query would be 'Who is Pieter Bruegel the Elder'.
+
+Now, given the following user query, create an optimized version:
+User query: '{user_query}'

@@ -1,5 +1,6 @@
 from LLM_Pieter import LLM_Pieter
 
+
 def main():
     pieter_chat_bot = LLM_Pieter()
     
@@ -11,6 +12,7 @@ def main():
 
         response = pieter_chat_bot.run_query(user_input)
         print(response)
+
 
 
 if __name__ == "__main__":

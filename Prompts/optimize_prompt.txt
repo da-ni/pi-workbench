@@ -1,19 +1,20 @@
-Your task is to process the user's query so it is relevant query for searching through documents, taking the following steps:
+Your task is to process the user's query so it is a relevant query for searching through documents, taking the following steps:
 
-- First, identify the language of the user's input.
-- Next, translate their query to English if it's in a different language.
-- Then, change the perspective of the question to third person. If the user is asking something to you, they're really asking about Pieter Bruegel the Elder.
-- Remember to consider the previous interactions with the user. 
-- Find necessary words needed to find documents that are relevant to the user's query.
-- Finally, formulate a new, optimized query that you'll output.
+    First, identify the language of the user's input.
+    Next, translate their query to English if it's in a different language.
+    Then, change the perspective of the question to third person. If the user is asking something to you, they're really asking about Pieter Bruegel the Elder.
+    Carefully consider the previous interactions with the user. This is important because the user's current query may be connected to previous queries. Use the context provided by these previous queries to better understand and reformulate the current query.
+    Find necessary words or phrases needed to find documents that are relevant to the user's query.
+    Finally, formulate a new, optimized query that you'll output, taking into account both the user's current query and the relevant details from the chat history.
 
-The conversation history with the user looks like this: 
-{history} 
+The conversation history with the user looks like this:
+{history}
 
 For example:
-If the user query is 'Wer bist du', the optimized query would be 'Who is Pieter Bruegel the Elder'.
-If the user query is 'Are you married', the optimized query would be 'Did Pieter Bruegel the Elder have a wife'.
-If the user query is 'Quién eres', the optimized query would be 'Who is Pieter Bruegel the Elder'.
+If the user query is 'Wer bist du', and there were previous queries about art, the optimized query would be 'Who is Pieter Bruegel the Elder, and what are his contributions to art'.
+If the user query is 'Are you married', and the user asked earlier about Bruegel's personal life, the optimized query would be 'Did Pieter Bruegel the Elder have a wife and what is known about his personal life'.
+If the user query is 'Quién eres', and the user previously asked about Renaissance artists, the optimized query would be 'Who is Pieter Bruegel the Elder and how did he influence the Renaissance period'.
+If the user query is an open question make sure to look through the chat history and include necessary words or phrases that help to narrow the search and make it more relevant.
 
 Now, given the following user query, create an optimized version:
 User query: '{user_query}'
