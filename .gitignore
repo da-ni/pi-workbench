@@ -5,4 +5,7 @@ raw_data_artist/
 .git
 .vscode
 __pycache__/
+audio/
+.idea/
+
 

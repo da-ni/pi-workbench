@@ -1,41 +1,40 @@
+import os
+import uuid
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 from LLM_Pieter import LLM_Pieter
-from elevenlabs import generate, play
-from elevenlabs import stream
+from elevenlabs import generate, save
 
-def main():
-    pieter_chat_bot = LLM_Pieter()
-    
-    while True:
-        user_input = input("Your message: ")
+app = FastAPI()
+pieter_chat_bot = LLM_Pieter()
 
-        if user_input == "exit":
-            break
+class Message(BaseModel):
+    message: str
 
-        response = pieter_chat_bot.run_query(user_input)
-        print(response)
+@app.post("/chat")
+def chat(message: Message):
+    user_input = message.message
 
-        """
-        audio = generate(
-            text= response,
-            voice="Bella",
-            model="eleven_monolingual_v1"
-        )
-        
-        play(audio)
-        """
+    if user_input == "exit":
+        return {"response": "Goodbye!"}
 
+    response = pieter_chat_bot.run_query(user_input)
 
-        audio_stream = generate(
-            text=response,
-            stream=True,
-            model="eleven_multilingual_v1",
-            #voice= "jSM24cfFHOkXdXgFH4c9"
-            #voice = "pNInz6obpgDQGcFmaJgB"
-            voice="VR6AewLTigWG4xSOukaG"
-        )
+    audio_filename = f"{uuid.uuid4()}.wav"
+    audio_dir = "audio"
+    os.makedirs(audio_dir, exist_ok=True)
+    audio_path = os.path.join(audio_dir, audio_filename)
 
-        stream(audio_stream)
+    audio = generate(
+        text=response,
+        model="eleven_multilingual_v1",
+        voice="VR6AewLTigWG4xSOukaG"
+    )
 
+    save(audio, audio_path)
+
+    return {"response": response, "audio_path": audio_path}
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run("main_CLI_elevenlabs:app", host="127.0.0.1", port=8000)
