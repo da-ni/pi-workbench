@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Example</title>
+    <style>
+        /* CSS styles for chat bubbles */
+        .chat-container {
+            width: 400px;
+            height: 500px;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+        }
+        .chat-bubble {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+            clear: both;
+            overflow-wrap: break-word;
+        }
+        .user-bubble {
+            float: right;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .bot-bubble {
+            float: left;
+            background-color: #2196F3;
+            color: white;
+        }
+        .audio-controls {
+            display: flex;
+            align-items: center;
+        }
+        .play-button,
+        .pause-button {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chatContainer"></div>
+    <input type="text" id="userInput" placeholder="Type your message here" />
+    <button id="sendButton">Send</button>
+
+    <script>
+        // Function to create a chat bubble
+        function createChatBubble(text, isUser, audioPath) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('chat-bubble');
+            if (isUser) {
+                bubble.classList.add('user-bubble');
+            } else {
+                bubble.classList.add('bot-bubble');
+            }
+            bubble.innerText = text;
+
+            if (audioPath) {
+                const audioControls = document.createElement('div');
+                audioControls.classList.add('audio-controls');
+                const audio = new Audio(audioPath);
+                const playButton = document.createElement('span');
+                playButton.classList.add('play-button');
+                playButton.innerHTML = '&#9658;'; // Play icon
+                const pauseButton = document.createElement('span');
+                pauseButton.classList.add('pause-button');
+                pauseButton.innerHTML = '&#10074;&#10074;'; // Pause icon
+                audioControls.appendChild(playButton);
+                audioControls.appendChild(pauseButton);
+                bubble.appendChild(audioControls);
+
+                playButton.addEventListener('click', () => {
+                    audio.play();
+                    playButton.style.display = 'none';
+                    pauseButton.style.display = 'inline-block';
+                });
+
+                pauseButton.addEventListener('click', () => {
+                    audio.pause();
+                    pauseButton.style.display = 'none';
+                    playButton.style.display = 'inline-block';
+                });
+            }
+
+            return bubble;
+        }
+
+        // Function to send a message to the API
+        function sendMessageToAPI(messageInput) {
+            const endpoint = 'http://localhost:8000/chat';
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: messageInput
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Process the API response here
+                const reply = data.response;
+                const audioPath = data.audio_path;
+                const botBubble = createChatBubble(reply, false, audioPath);
+                document.getElementById('chatContainer').appendChild(botBubble);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to handle user input and send the message
+        function handleUserInput() {
+            const userInput = document.getElementById('userInput');
+            const userMessage = userInput.value.trim();
+            if (userMessage !== '') {
+                const userBubble = createChatBubble(userMessage, true);
+                document.getElementById('chatContainer').appendChild(userBubble);
+                userInput.value = '';
+
+                sendMessageToAPI(userMessage);
+            }
+        }
+
+        // Event listener for the send button
+        document.getElementById('sendButton').addEventListener('click', handleUserInput);
+
+        // Event listener for the Enter key in the text input
+        document.getElementById('userInput').addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                handleUserInput();
+            }
+        });
+    </script>
+</body>
+</html>
