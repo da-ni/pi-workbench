@@ -37,6 +37,9 @@ def initialize_pieter_chat_bot():
 def chat(message: Message):
     user_input = message.message
 
+    if pieter_chat_bot is None:
+        initialize_pieter_chat_bot()
+
     response = pieter_chat_bot.run_query(user_input)
 
     audio_filename = f"{uuid.uuid4()}.wav"
@@ -60,5 +63,4 @@ def reset_chat_bot():
     return {"message": "Chat bot has been reset."}
 
 if __name__ == "__main__":
-    initialize_pieter_chat_bot()
     uvicorn.run("main_CLI_elevenlabs:app", host="127.0.0.1", port=8000)
