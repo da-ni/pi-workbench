@@ -22,10 +22,10 @@ class LLM_Pieter:
         self.optimized_prompt = None
         self.final_prompt = None
         self.seq_chain = None
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = OpenAIEmbeddings() # type: ignore
         self.vectordb = self._initialize_vectordb()
-        self.llmSimilarty = ChatOpenAI(temperature=sim_temp, model='gpt-3.5-turbo')
-        self.llmPieter = ChatOpenAI(temperature=pieter_temp, model='gpt-3.5-turbo')
+        self.llmSimilarty = ChatOpenAI(temperature=sim_temp, model='gpt-3.5-turbo') # type: ignore
+        self.llmPieter = ChatOpenAI(temperature=pieter_temp, model='gpt-3.5-turbo') # type: ignore
         self._load_prompt_templates()
         self._set_up_llm_chains()
 
@@ -68,9 +68,9 @@ class LLM_Pieter:
 
 
     def _set_up_llm_chains(self):
-        optimize_query_chain = LLMChain(llm=self.llmSimilarty, prompt=self.optimized_prompt, output_key = 'optimized_query', verbose=True)
+        optimize_query_chain = LLMChain(llm=self.llmSimilarty, prompt=self.optimized_prompt, output_key = 'optimized_query', verbose=True) # type: ignore
         similarity_search_chain = TransformChain(input_variables = ['optimized_query', 'history'], output_variables=['reference_docs'], transform=self._get_reference_documents)
-        final_query_chain = LLMChain(llm=self.llmPieter, prompt=self.final_prompt, output_key = 'response', verbose=True)
+        final_query_chain = LLMChain(llm=self.llmPieter, prompt=self.final_prompt, output_key = 'response', verbose=True) # type: ignore
 
         #fit the chains together
         self.seq_chain = SequentialChain(
