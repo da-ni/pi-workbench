@@ -1,7 +1,7 @@
 import os
 import uuid
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from LLM_Pieter import LLM_Pieter
@@ -45,8 +45,17 @@ def initialize_pieter_chat_bot():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+def save_audio(response, audio_path):
+    audio = generate(
+        text=response,
+        model="eleven_multilingual_v1",
+        voice="VR6AewLTigWG4xSOukaG"
+    )
+    save(audio, audio_path)
+    print(f"> Saved audio to {audio_path}")
+
 @app.post("/chat")
-def chat(message: Message):
+def chat(message: Message, background_tasks: BackgroundTasks):
     try:
         user_input = message.message
         response = pieter_chat_bot.run_query(user_input) # type: ignore
@@ -56,13 +65,7 @@ def chat(message: Message):
         os.makedirs(audio_dir, exist_ok=True)
         audio_path = os.path.join(audio_dir, audio_filename)
 
-        audio = generate(
-            text=response,
-            model="eleven_multilingual_v1",
-            voice="VR6AewLTigWG4xSOukaG"
-        )
-
-        save(audio, audio_path) # type: ignore
+        background_tasks.add_task(save_audio, response, audio_path)
 
         return {"response": response, "audio_path": audio_path}
     except Exception as e:
