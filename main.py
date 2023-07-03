@@ -45,29 +45,34 @@ def initialize_pieter_chat_bot():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-def save_audio(response, audio_path):
-    audio = generate(
-        text=response,
-        model="eleven_multilingual_v1",
-        voice="VR6AewLTigWG4xSOukaG"
-    )
-    save(audio, audio_path)
-    print(f"> Saved audio to {audio_path}")
-
 @app.post("/chat")
-def chat(message: Message, background_tasks: BackgroundTasks):
+def chat(message: Message):
     try:
         user_input = message.message
-        response = pieter_chat_bot.run_query(user_input) # type: ignore
+        response = pieter_chat_bot.run_query(user_input)
+
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/chat/audio")
+def generate_audio(message: Message):
+    try:
+        text = message.message
 
         audio_filename = f"{uuid.uuid4()}.wav"
         audio_dir = "audio"
         os.makedirs(audio_dir, exist_ok=True)
         audio_path = os.path.join(audio_dir, audio_filename)
 
-        background_tasks.add_task(save_audio, response, audio_path)
+        audio = generate(
+            text=text,
+            model="eleven_multilingual_v1",
+            voice="VR6AewLTigWG4xSOukaG"
+        )
+        save(audio, audio_path)
 
-        return {"response": response, "audio_path": audio_path}
+        return {"audio_path": audio_path}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -80,4 +85,4 @@ def reset_chat_bot():
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("main_CLI_elevenlabs:app", host="127.0.0.1", port=8000)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000)
